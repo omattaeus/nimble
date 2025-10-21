@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: nimble-mysql
+    environment:
+      MYSQL_DATABASE: nimble
+      MYSQL_USER: nimble
+      MYSQL_PASSWORD: nimble
+      MYSQL_ROOT_PASSWORD: Umasenhaaib@165812
+    ports:
+      - "3307:3306"
+    command:
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
+    volumes:
+      - mysqldata:/var/lib/mysql
+volumes:
+  mysqldata:
