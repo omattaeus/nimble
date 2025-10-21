@@ -6,7 +6,7 @@ services:
       MYSQL_DATABASE: nimble
       MYSQL_USER: nimble
       MYSQL_PASSWORD: nimble
-      MYSQL_ROOT_PASSWORD: Umasenhaaib@165812
+      MYSQL_ROOT_PASSWORD: root123
     ports:
       - "3307:3306"
     command:
@@ -14,5 +14,31 @@ services:
       - "--collation-server=utf8mb4_unicode_ci"
     volumes:
       - mysqldata:/var/lib/mysql
+    networks:
+      - nimble-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      timeout: 20s
+      retries: 10
+
+  app:
+    build: .
+    container_name: nimble-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nimble?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - nimble-network
+
 volumes:
   mysqldata:
+
+networks:
+  nimble-network:
+    driver: bridge
