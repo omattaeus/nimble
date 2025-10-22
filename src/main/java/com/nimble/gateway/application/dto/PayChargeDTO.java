@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -17,7 +18,7 @@ import jakarta.validation.constraints.Size;
 public class PayChargeDTO {
     
     @NotNull(message = "Charge ID is required")
-    private Long chargeId;
+    private UUID chargeId;
     
     @NotBlank(message = "Payment method is required")
     @Pattern(regexp = "BALANCE|CREDIT_CARD", message = "Payment method must be BALANCE or CREDIT_CARD")

@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -41,7 +42,7 @@ public class ChargeController {
     })
     public ResponseEntity<ChargeDTO> createCharge(
             @Valid @RequestBody CreateChargeDTO createChargeDTO,
-            @Parameter(description = "ID of the user creating the charge") @RequestParam Long originatorId) {
+            @Parameter(description = "ID of the user creating the charge") @RequestParam UUID originatorId) {
         
         log.info("Creating charge from user {} to CPF {}", originatorId, createChargeDTO.getRecipientCpf());
         
@@ -52,7 +53,7 @@ public class ChargeController {
     
     @GetMapping("/sent")
     public ResponseEntity<List<ChargeDTO>> getSentCharges(
-            @RequestParam Long userId,
+            @RequestParam UUID userId,
             @RequestParam(required = false) String status) {
         
         log.info("Getting sent charges for user {} with status {}", userId, status);
@@ -64,7 +65,7 @@ public class ChargeController {
     
     @GetMapping("/received")
     public ResponseEntity<List<ChargeDTO>> getReceivedCharges(
-            @RequestParam Long userId,
+            @RequestParam UUID userId,
             @RequestParam(required = false) String status) {
         
         log.info("Getting received charges for user {} with status {}", userId, status);
@@ -76,8 +77,8 @@ public class ChargeController {
     
     @GetMapping("/{chargeId}")
     public ResponseEntity<ChargeDTO> getChargeById(
-            @PathVariable Long chargeId,
-            @RequestParam Long userId) {
+            @PathVariable UUID chargeId,
+            @RequestParam UUID userId) {
         
         log.info("Getting charge {} for user {}", chargeId, userId);
         

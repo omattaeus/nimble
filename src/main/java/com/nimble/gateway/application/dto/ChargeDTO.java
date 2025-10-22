@@ -7,16 +7,17 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChargeDTO {
-    private Long id;
-    private Long originatorId;
+    private UUID id;
+    private UUID originatorId;
     private String originatorName;
-    private Long recipientId;
+    private UUID recipientId;
     private String recipientName;
     private BigDecimal amount;
     private String description;

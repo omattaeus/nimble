@@ -9,9 +9,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ChargeRepositoryImpl extends JpaRepository<Charge, Long>, ChargeRepository {
+public interface ChargeRepositoryImpl extends JpaRepository<Charge, UUID>, ChargeRepository {
     
     @Override
     List<Charge> findByOriginator(User originator);

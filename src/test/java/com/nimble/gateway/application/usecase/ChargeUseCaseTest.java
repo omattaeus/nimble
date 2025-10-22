@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,8 +47,12 @@ class ChargeUseCaseTest {
 
     @BeforeEach
     void setUp() {
+        UUID originatorId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID recipientId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID chargeId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+        
         originator = User.builder()
-                .id(1L)
+                .id(originatorId)
                 .name("João Silva")
                 .cpf("12345678901")
                 .email("joao@teste.com")
@@ -57,7 +62,7 @@ class ChargeUseCaseTest {
                 .build();
 
         recipient = User.builder()
-                .id(2L)
+                .id(recipientId)
                 .name("Maria Santos")
                 .cpf("98765432100")
                 .email("maria@teste.com")
@@ -67,7 +72,7 @@ class ChargeUseCaseTest {
                 .build();
 
         testCharge = Charge.builder()
-                .id(1L)
+                .id(chargeId)
                 .originator(originator)
                 .recipient(recipient)
                 .amount(BigDecimal.valueOf(100.00))
@@ -90,25 +95,23 @@ class ChargeUseCaseTest {
         @Test
         @DisplayName("Given valid data, when creating charge, then should return ChargeDTO")
         void givenValidData_whenCreateCharge_thenShouldReturnChargeDTO() {
-            // Given
-            when(userRepository.findById(1L)).thenReturn(Optional.of(originator));
+
+            when(userRepository.findById(originator.getId())).thenReturn(Optional.of(originator));
             when(userRepository.findByCpf("98765432100")).thenReturn(Optional.of(recipient));
             when(chargeRepository.save(any(Charge.class))).thenReturn(testCharge);
 
-            // When
-            ChargeDTO result = chargeUseCase.createCharge(createChargeDTO, 1L);
+            ChargeDTO result = chargeUseCase.createCharge(createChargeDTO, originator.getId());
 
-            // Then
             assertThat(result).isNotNull();
-            assertThat(result.getOriginatorId()).isEqualTo(1L);
+            assertThat(result.getOriginatorId()).isEqualTo(originator.getId());
             assertThat(result.getOriginatorName()).isEqualTo("João Silva");
-            assertThat(result.getRecipientId()).isEqualTo(2L);
+            assertThat(result.getRecipientId()).isEqualTo(recipient.getId());
             assertThat(result.getRecipientName()).isEqualTo("Maria Santos");
             assertThat(result.getAmount()).isEqualTo(BigDecimal.valueOf(100.00));
             assertThat(result.getDescription()).isEqualTo("Pagamento de serviços");
             assertThat(result.getStatus()).isEqualTo("PENDING");
 
-            verify(userRepository).findById(1L);
+            verify(userRepository).findById(originator.getId());
             verify(userRepository).findByCpf("98765432100");
             verify(chargeRepository).save(any(Charge.class));
         }
@@ -116,15 +119,15 @@ class ChargeUseCaseTest {
         @Test
         @DisplayName("Given non-existent originator, when creating charge, then should throw exception")
         void givenNonExistentOriginator_whenCreateCharge_thenShouldThrowException() {
-            // Given
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-            // When & Then
-            assertThatThrownBy(() -> chargeUseCase.createCharge(createChargeDTO, 999L))
+            UUID nonExistentUserId = UUID.fromString("99999999-9999-9999-9999-999999999999");
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> chargeUseCase.createCharge(createChargeDTO, nonExistentUserId))
                     .isInstanceOf(UserNotFoundException.class)
                     .hasMessage("Originator not found");
 
-            verify(userRepository).findById(999L);
+            verify(userRepository).findById(any(UUID.class));
             verify(userRepository, never()).findByCpf(anyString());
             verify(chargeRepository, never()).save(any(Charge.class));
         }
@@ -132,8 +135,8 @@ class ChargeUseCaseTest {
         @Test
         @DisplayName("Given non-existent recipient, when creating charge, then should throw exception")
         void givenNonExistentRecipient_whenCreateCharge_thenShouldThrowException() {
-            // Given
-            when(userRepository.findById(1L)).thenReturn(Optional.of(originator));
+
+            when(userRepository.findById(originator.getId())).thenReturn(Optional.of(originator));
             when(userRepository.findByCpf("99999999999")).thenReturn(Optional.empty());
 
             CreateChargeDTO invalidDTO = CreateChargeDTO.builder()
@@ -142,12 +145,11 @@ class ChargeUseCaseTest {
                     .description("Pagamento de serviços")
                     .build();
 
-            // When & Then
-            assertThatThrownBy(() -> chargeUseCase.createCharge(invalidDTO, 1L))
+            assertThatThrownBy(() -> chargeUseCase.createCharge(invalidDTO, originator.getId()))
                     .isInstanceOf(UserNotFoundException.class)
                     .hasMessage("Recipient not found with CPF: 99999999999");
 
-            verify(userRepository).findById(1L);
+            verify(userRepository).findById(originator.getId());
             verify(userRepository).findByCpf("99999999999");
             verify(chargeRepository, never()).save(any(Charge.class));
         }
@@ -155,8 +157,8 @@ class ChargeUseCaseTest {
         @Test
         @DisplayName("Given originator trying to create charge for himself, when creating charge, then should throw exception")
         void givenOriginatorCreatingChargeForHimself_whenCreateCharge_thenShouldThrowException() {
-            // Given
-            when(userRepository.findById(1L)).thenReturn(Optional.of(originator));
+
+            when(userRepository.findById(originator.getId())).thenReturn(Optional.of(originator));
             when(userRepository.findByCpf("12345678901")).thenReturn(Optional.of(originator));
 
             CreateChargeDTO selfChargeDTO = CreateChargeDTO.builder()
@@ -165,12 +167,11 @@ class ChargeUseCaseTest {
                     .description("Pagamento de serviços")
                     .build();
 
-            // When & Then
-            assertThatThrownBy(() -> chargeUseCase.createCharge(selfChargeDTO, 1L))
+            assertThatThrownBy(() -> chargeUseCase.createCharge(selfChargeDTO, originator.getId()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Cannot create charge to yourself");
 
-            verify(userRepository).findById(1L);
+            verify(userRepository).findById(originator.getId());
             verify(userRepository).findByCpf("12345678901");
             verify(chargeRepository, never()).save(any(Charge.class));
         }
@@ -183,54 +184,50 @@ class ChargeUseCaseTest {
         @Test
         @DisplayName("Given valid originator, when getting sent charges, then should return ChargeDTO list")
         void givenValidOriginator_whenGetChargesByOriginator_thenShouldReturnChargeDTOList() {
-            // Given
-            when(userRepository.findById(1L)).thenReturn(Optional.of(originator));
+
+            when(userRepository.findById(originator.getId())).thenReturn(Optional.of(originator));
             when(chargeRepository.findByOriginator(originator)).thenReturn(Arrays.asList(testCharge));
 
-            // When
-            List<ChargeDTO> result = chargeUseCase.getChargesByOriginator(1L, null);
+            List<ChargeDTO> result = chargeUseCase.getChargesByOriginator(originator.getId(), null);
 
-            // Then
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).getOriginatorId()).isEqualTo(1L);
-            assertThat(result.get(0).getRecipientId()).isEqualTo(2L);
+            assertThat(result.get(0).getOriginatorId()).isEqualTo(originator.getId());
+            assertThat(result.get(0).getRecipientId()).isEqualTo(recipient.getId());
             assertThat(result.get(0).getStatus()).isEqualTo("PENDING");
 
-            verify(userRepository).findById(1L);
+            verify(userRepository).findById(originator.getId());
             verify(chargeRepository).findByOriginator(originator);
         }
 
         @Test
         @DisplayName("Given valid originator with status filter, when getting sent charges, then should return filtered list")
         void givenValidOriginatorWithStatusFilter_whenGetChargesByOriginator_thenShouldReturnFilteredList() {
-            // Given
-            when(userRepository.findById(1L)).thenReturn(Optional.of(originator));
+
+            when(userRepository.findById(originator.getId())).thenReturn(Optional.of(originator));
             when(chargeRepository.findByOriginatorAndStatus(originator, Charge.ChargeStatus.PENDING))
                     .thenReturn(Arrays.asList(testCharge));
 
-            // When
-            List<ChargeDTO> result = chargeUseCase.getChargesByOriginator(1L, "PENDING");
+            List<ChargeDTO> result = chargeUseCase.getChargesByOriginator(originator.getId(), "PENDING");
 
-            // Then
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getStatus()).isEqualTo("PENDING");
 
-            verify(userRepository).findById(1L);
+            verify(userRepository).findById(originator.getId());
             verify(chargeRepository).findByOriginatorAndStatus(originator, Charge.ChargeStatus.PENDING);
         }
 
         @Test
         @DisplayName("Given non-existent originator, when getting sent charges, then should throw exception")
         void givenNonExistentOriginator_whenGetChargesByOriginator_thenShouldThrowException() {
-            // Given
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-            // When & Then
-            assertThatThrownBy(() -> chargeUseCase.getChargesByOriginator(999L, null))
+            UUID nonExistentUserId = UUID.fromString("99999999-9999-9999-9999-999999999999");
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> chargeUseCase.getChargesByOriginator(nonExistentUserId, null))
                     .isInstanceOf(UserNotFoundException.class)
-                    .hasMessage("User not found with ID: 999");
+                    .hasMessage("User not found with ID: 99999999-9999-9999-9999-999999999999");
 
-            verify(userRepository).findById(999L);
+            verify(userRepository).findById(any(UUID.class));
             verify(chargeRepository, never()).findByOriginator(any(User.class));
         }
     }
@@ -242,39 +239,35 @@ class ChargeUseCaseTest {
         @Test
         @DisplayName("Given valid recipient, when getting received charges, then should return ChargeDTO list")
         void givenValidRecipient_whenGetChargesByRecipient_thenShouldReturnChargeDTOList() {
-            // Given
-            when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
+
+            when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
             when(chargeRepository.findByRecipient(recipient)).thenReturn(Arrays.asList(testCharge));
 
-            // When
-            List<ChargeDTO> result = chargeUseCase.getChargesByRecipient(2L, null);
+            List<ChargeDTO> result = chargeUseCase.getChargesByRecipient(recipient.getId(), null);
 
-            // Then
             assertThat(result).hasSize(1);
-            assertThat(result.get(0).getOriginatorId()).isEqualTo(1L);
-            assertThat(result.get(0).getRecipientId()).isEqualTo(2L);
+            assertThat(result.get(0).getOriginatorId()).isEqualTo(originator.getId());
+            assertThat(result.get(0).getRecipientId()).isEqualTo(recipient.getId());
             assertThat(result.get(0).getStatus()).isEqualTo("PENDING");
 
-            verify(userRepository).findById(2L);
+            verify(userRepository).findById(recipient.getId());
             verify(chargeRepository).findByRecipient(recipient);
         }
 
         @Test
         @DisplayName("Given valid recipient with status filter, when getting received charges, then should return filtered list")
         void givenValidRecipientWithStatusFilter_whenGetChargesByRecipient_thenShouldReturnFilteredList() {
-            // Given
-            when(userRepository.findById(2L)).thenReturn(Optional.of(recipient));
+
+            when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
             when(chargeRepository.findByRecipientAndStatus(recipient, Charge.ChargeStatus.PENDING))
                     .thenReturn(Arrays.asList(testCharge));
 
-            // When
-            List<ChargeDTO> result = chargeUseCase.getChargesByRecipient(2L, "PENDING");
+            List<ChargeDTO> result = chargeUseCase.getChargesByRecipient(recipient.getId(), "PENDING");
 
-            // Then
             assertThat(result).hasSize(1);
             assertThat(result.get(0).getStatus()).isEqualTo("PENDING");
 
-            verify(userRepository).findById(2L);
+            verify(userRepository).findById(recipient.getId());
             verify(chargeRepository).findByRecipientAndStatus(recipient, Charge.ChargeStatus.PENDING);
         }
     }
@@ -286,34 +279,32 @@ class ChargeUseCaseTest {
         @Test
         @DisplayName("Given valid ID, when getting charge, then should return ChargeDTO")
         void givenValidId_whenGetChargeById_thenShouldReturnChargeDTO() {
-            // Given
-            when(chargeRepository.findById(1L)).thenReturn(Optional.of(testCharge));
 
-            // When
-            ChargeDTO result = chargeUseCase.getChargeById(1L, 1L);
+            when(chargeRepository.findById(testCharge.getId())).thenReturn(Optional.of(testCharge));
 
-            // Then
+            ChargeDTO result = chargeUseCase.getChargeById(testCharge.getId(), originator.getId());
+
             assertThat(result).isNotNull();
-            assertThat(result.getId()).isEqualTo(1L);
-            assertThat(result.getOriginatorId()).isEqualTo(1L);
-            assertThat(result.getRecipientId()).isEqualTo(2L);
+            assertThat(result.getId()).isEqualTo(testCharge.getId());
+            assertThat(result.getOriginatorId()).isEqualTo(originator.getId());
+            assertThat(result.getRecipientId()).isEqualTo(recipient.getId());
             assertThat(result.getAmount()).isEqualTo(BigDecimal.valueOf(100.00));
 
-            verify(chargeRepository).findById(1L);
+            verify(chargeRepository).findById(testCharge.getId());
         }
 
         @Test
         @DisplayName("Given non-existent ID, when getting charge, then should throw exception")
         void givenNonExistentId_whenGetChargeById_thenShouldThrowException() {
-            // Given
-            when(chargeRepository.findById(999L)).thenReturn(Optional.empty());
 
-            // When & Then
-            assertThatThrownBy(() -> chargeUseCase.getChargeById(999L, 1L))
+            UUID nonExistentChargeId = UUID.fromString("99999999-9999-9999-9999-999999999999");
+            when(chargeRepository.findById(nonExistentChargeId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> chargeUseCase.getChargeById(nonExistentChargeId, originator.getId()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Charge not found");
 
-            verify(chargeRepository).findById(999L);
+            verify(chargeRepository).findById(any(UUID.class));
         }
     }
 }

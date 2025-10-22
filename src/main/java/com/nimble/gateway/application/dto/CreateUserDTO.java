@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.nimble.gateway.application.validation.UniqueCpf;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -22,6 +23,7 @@ public class CreateUserDTO {
     
     @NotBlank(message = "CPF is required")
     @Pattern(regexp = "\\d{11}", message = "CPF must contain exactly 11 digits")
+    @UniqueCpf(message = "CPF already exists")
     private String cpf;
     
     @NotBlank(message = "Email is required")

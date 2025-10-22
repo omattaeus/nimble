@@ -27,8 +27,11 @@ public class DatabaseHealthIndicator {
                 }
             }
             return false;
-        } catch (Exception e) {
-            log.error("Database health check failed", e);
+        } catch (java.sql.SQLException e) {
+            log.error("Database connection failed: {}", e.getMessage());
+            return false;
+        } catch (RuntimeException e) {
+            log.error("Unexpected error during database health check", e);
             return false;
         }
     }

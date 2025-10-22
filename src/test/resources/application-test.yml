@@ -24,17 +24,58 @@ app:
 # External Services
 external:
   authorizer:
-    url: https://httpbin.org/status/200
+    url: https://httpbin.org/anything
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      authorizerService:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+  retry:
+    instances:
+      authorizerService:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
 
 # Actuator Configuration
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,circuitbreakers,retries
   endpoint:
     health:
       show-details: when-authorized
+  metrics:
+    export:
+      simple:
+        enabled: true
+
+# SpringDoc Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    display-request-duration: true
+    deep-linking: true
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    doc-expansion: list
+    show-extensions: true
+    show-common-extensions: true
 
 # Logging Configuration
 logging:

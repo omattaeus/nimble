@@ -1,7 +1,5 @@
 package com.nimble.gateway.infrastructure.security;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,22 +10,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
     
-    private final Cache<String, AtomicInteger> requestCounts = Caffeine.newBuilder()
-            .maximumSize(10000)
-            .expireAfterWrite(Duration.ofMinutes(1))
-            .build();
-    
-    private final Cache<String, AtomicInteger> loginAttempts = Caffeine.newBuilder()
-            .maximumSize(1000)
-            .expireAfterWrite(Duration.ofMinutes(15))
-            .build();
+    private final ConcurrentHashMap<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, AtomicInteger> loginAttempts = new ConcurrentHashMap<>();
     
     private static final int MAX_REQUESTS_PER_MINUTE = 1000;
     private static final int MAX_LOGIN_ATTEMPTS_PER_15_MINUTES = 50;
@@ -66,22 +57,20 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     }
     
     private boolean isLoginRateLimited(String clientIp) {
-        AtomicInteger attempts = loginAttempts.get(clientIp, k -> new AtomicInteger(0));
+        AtomicInteger attempts = loginAttempts.computeIfAbsent(clientIp, k -> new AtomicInteger(0));
         int currentAttempts = attempts.incrementAndGet();
         return currentAttempts > MAX_LOGIN_ATTEMPTS_PER_15_MINUTES;
     }
     
     private boolean isGeneralRateLimited(String clientIp) {
-        AtomicInteger requests = requestCounts.get(clientIp, k -> new AtomicInteger(0));
+        AtomicInteger requests = requestCounts.computeIfAbsent(clientIp, k -> new AtomicInteger(0));
         int currentRequests = requests.incrementAndGet();
         return currentRequests > MAX_REQUESTS_PER_MINUTE;
     }
     
     private String getClientIpAddress(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) return xForwardedFor.split(",")[0].trim();
         
         String xRealIp = request.getHeader("X-Real-IP");
         if (xRealIp != null && !xRealIp.isEmpty()) return xRealIp;

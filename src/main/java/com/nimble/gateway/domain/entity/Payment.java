@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "payments", indexes = {
@@ -23,11 +24,12 @@ import java.time.LocalDateTime;
 public class Payment {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "BINARY(16)")
+    private UUID id;
     
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "charge_id", nullable = false)
+    @JoinColumn(name = "charge_id", nullable = true)
     private Charge charge;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -100,6 +102,12 @@ public class Payment {
         this.failedAt = LocalDateTime.now();
     }
     
+    public void markAsRefunded() {
+        if (this.status != PaymentStatus.PROCESSED) throw new IllegalStateException("Only processed payments can be refunded");
+        this.status = PaymentStatus.REFUNDED;
+        this.updatedAt = LocalDateTime.now();
+    }
+    
     public boolean isProcessed() {
         return this.status == PaymentStatus.PROCESSED;
     }
@@ -112,8 +120,12 @@ public class Payment {
         return this.status == PaymentStatus.PENDING;
     }
     
+    public boolean isRefunded() {
+        return this.status == PaymentStatus.REFUNDED;
+    }
+    
     public enum PaymentStatus {
-        PENDING, PROCESSED, FAILED
+        PENDING, PROCESSED, FAILED, REFUNDED
     }
     
     public enum PaymentMethod {

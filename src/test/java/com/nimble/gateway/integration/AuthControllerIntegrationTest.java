@@ -63,9 +63,10 @@ class AuthControllerIntegrationTest {
                     .password("12345678")
                     .build();
 
-            // When & Then
+            // When
             var response = restTemplate.postForEntity("http://localhost:" + port + "/api/auth/register", createUserDTO, Object.class);
-            
+
+            // Then
             assertThat(response.getStatusCode().value()).isEqualTo(201);
         }
 
@@ -74,15 +75,16 @@ class AuthControllerIntegrationTest {
         void givenInvalidData_whenRegisterUser_thenShouldReturn400() throws Exception {
             // Given
             CreateUserDTO invalidDTO = CreateUserDTO.builder()
-                    .name("") // Empty name
-                    .cpf("123") // Invalid CPF
-                    .email("email-invalido") // Invalid email
-                    .password("123") // Password too short
+                    .name("")
+                    .cpf("123")
+                    .email("email-invalido")
+                    .password("123")
                     .build();
 
-            // When & Then
+            // When
             var response = restTemplate.postForEntity("http://localhost:" + port + "/api/auth/register", invalidDTO, Object.class);
-            
+
+            // Then
             assertThat(response.getStatusCode().value()).isEqualTo(400);
         }
     }
@@ -106,14 +108,16 @@ class AuthControllerIntegrationTest {
                     .build();
             User savedUser = userRepository.save(user);
 
+            // When
             LoginDTO loginDTO = LoginDTO.builder()
                     .username("joao@teste.com")
                     .password("12345678")
                     .build();
 
-            // When & Then
+
             var response = restTemplate.postForEntity("http://localhost:" + port + "/api/auth/login", loginDTO, Object.class);
-            
+
+            // Then
             assertThat(response.getStatusCode().value()).isEqualTo(200);
         }
 
@@ -132,29 +136,31 @@ class AuthControllerIntegrationTest {
                     .build();
             userRepository.save(user);
 
+            // When
             LoginDTO loginDTO = LoginDTO.builder()
                     .username("joao@teste.com")
                     .password("wrongPassword")
                     .build();
 
-            // When & Then
+            // When
             var response = restTemplate.postForEntity("http://localhost:" + port + "/api/auth/login", loginDTO, Object.class);
-            
+
+            // Then
             assertThat(response.getStatusCode().value()).isEqualTo(401);
         }
 
         @Test
         @DisplayName("Given non-existent user, when logging in, then should return 401")
         void givenNonExistentUser_whenLogin_thenShouldReturn401() throws Exception {
-            // Given
+
             LoginDTO loginDTO = LoginDTO.builder()
                     .username("nonexistent@teste.com")
                     .password("12345678")
                     .build();
 
-            // When & Then
+
             var response = restTemplate.postForEntity("http://localhost:" + port + "/api/auth/login", loginDTO, Object.class);
-            
+
             assertThat(response.getStatusCode().value()).isEqualTo(401);
         }
     }
@@ -166,9 +172,9 @@ class AuthControllerIntegrationTest {
         @Test
         @DisplayName("Given no token, when getting current user, then should return 401")
         void givenNoToken_whenGetCurrentUser_thenShouldReturn401() throws Exception {
-            // When & Then
+
             var response = restTemplate.getForEntity("http://localhost:" + port + "/api/auth/me", Object.class);
-            
+
             assertThat(response.getStatusCode().value()).isEqualTo(401);
         }
     }

@@ -12,19 +12,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthorizerResponse {
     
-    @JsonProperty("approved")
-    private Boolean approved;
+    @JsonProperty("status")
+    private String status;
     
-    @JsonProperty("authorization_code")
-    private String authorizationCode;
-    
-    @JsonProperty("message")
-    private String message;
-    
-    @JsonProperty("transaction_id")
-    private String transactionId;
+    @JsonProperty("data")
+    private AuthorizerData data;
     
     public boolean isApproved() {
-        return Boolean.TRUE.equals(approved);
+        return "success".equals(status) && data != null && Boolean.TRUE.equals(data.getAuthorized());
+    }
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AuthorizerData {
+        @JsonProperty("authorized")
+        private Boolean authorized;
     }
 }

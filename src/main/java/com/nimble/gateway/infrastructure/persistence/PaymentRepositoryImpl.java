@@ -10,9 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface PaymentRepositoryImpl extends JpaRepository<Payment, Long>, PaymentRepository {
+public interface PaymentRepositoryImpl extends JpaRepository<Payment, UUID>, PaymentRepository {
     
     @Override
     List<Payment> findByPayer(User payer);

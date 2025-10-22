@@ -1,0 +1,34 @@
+package com.nimble.gateway.integration;
+
+import com.nimble.gateway.infrastructure.external.AuthorizerService;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import reactor.core.publisher.Mono;
+
+@TestConfiguration
+@Profile("test")
+public class TestConfig {
+
+    @Bean
+    @Primary
+    public AuthorizerService mockAuthorizerService() {
+        return new AuthorizerService(null) {
+            @Override
+            public Mono<Boolean> authorizePayment(java.math.BigDecimal amount) {
+                return Mono.just(true);
+            }
+
+            @Override
+            public Mono<Boolean> authorizeDeposit(java.math.BigDecimal amount) {
+                return Mono.just(true);
+            }
+
+            @Override
+            public Mono<Boolean> authorizeCancellation(java.math.BigDecimal amount) {
+                return Mono.just(true);
+            }
+        };
+    }
+}

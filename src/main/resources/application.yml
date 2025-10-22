@@ -5,12 +5,14 @@ spring:
     password: root123
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
         jdbc.time_zone: UTC
+        id.new_generator_mappings: true
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
   flyway:
     enabled: true
 
@@ -24,7 +26,7 @@ app:
 # External Services
 external:
   authorizer:
-    url: https://zsy6tx7aql.execute-api.saeast-1.amazonaws.com
+    url: https://zsy6tx7aql.execute-api.sa-east-1.amazonaws.com
 
 # Resilience4j Configuration
 resilience4j:
@@ -49,10 +51,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,circuitbreakers,retries
   endpoint:
     health:
       show-details: when-authorized
+  metrics:
+    export:
+      simple:
+        enabled: true
 
 # SpringDoc Configuration
 springdoc:

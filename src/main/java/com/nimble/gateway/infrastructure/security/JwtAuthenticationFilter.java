@@ -31,26 +31,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                   FilterChain filterChain) throws ServletException, IOException {
         
         String requestURI = request.getRequestURI();
-        log.info("🔍 JWT Filter processing request: {}", requestURI);
+        log.debug("Processing JWT authentication for request: {}", requestURI);
         
         if (isPublicEndpoint(requestURI)) {
-            log.info("🔓 Public endpoint, skipping JWT validation: {}", requestURI);
+            log.debug("Skipping JWT validation for public endpoint: {}", requestURI);
             filterChain.doFilter(request, response);
             return;
         }
         
         try {
             String jwt = getJwtFromRequest(request);
-            log.info("🔑 JWT token found: {}", jwt != null ? "YES" : "NO");
             
             if (StringUtils.hasText(jwt)) {
-                log.info("🔍 Validating JWT token...");
+                log.debug("JWT token found, validating...");
                 boolean isValid = jwtTokenProvider.validateToken(jwt);
-                log.info("✅ JWT token valid: {}", isValid);
                 
                 if (isValid) {
                     String username = jwtTokenProvider.getUsernameFromToken(jwt);
-                    log.info("👤 JWT valid for user: {}", username);
+                    log.debug("JWT token valid for user: {}", username);
                     
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                     UsernamePasswordAuthenticationToken authentication = 
@@ -58,15 +56,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.info("✅ Authentication set for user: {}", username);
+                    log.info("User authenticated successfully: {}", username);
                 } else {
-                    log.warn("❌ JWT token validation failed");
+                    log.warn("JWT token validation failed for request: {}", requestURI);
                 }
             } else {
-                log.warn("❌ No JWT token found in request");
+                log.warn("No JWT token found in request: {}", requestURI);
             }
         } catch (Exception ex) {
-            log.error("❌ Could not set user authentication in security context", ex);
+            log.error("Authentication error for request {}: {}", requestURI, ex.getMessage());
         }
         
         filterChain.doFilter(request, response);

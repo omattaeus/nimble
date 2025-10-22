@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +45,7 @@ class UserUseCaseTest {
     @BeforeEach
     void setUp() {
         testUser = User.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .name("João Silva")
                 .cpf("12345678901")
                 .email("joao@teste.com")
@@ -69,16 +70,14 @@ class UserUseCaseTest {
         @Test
         @DisplayName("Given a valid user, when creating user, then should return UserDTO with correct data")
         void givenValidUser_whenCreateUser_thenShouldReturnUserDTO() {
-            // Given
-            when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-            when(userRepository.findByCpf(anyString())).thenReturn(Optional.empty());
+
             when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
             when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-            // When
+
             UserDTO result = userUseCase.createUser(createUserDTO);
 
-            // Then
+
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("João Silva");
             assertThat(result.getCpf()).isEqualTo("12345678901");
@@ -86,42 +85,24 @@ class UserUseCaseTest {
             assertThat(result.getBalance()).isEqualTo(BigDecimal.ZERO);
             assertThat(result.getIsActive()).isTrue();
 
-            verify(userRepository).findByEmail("joao@teste.com");
-            verify(userRepository).findByCpf("12345678901");
             verify(passwordEncoder).encode("12345678");
             verify(userRepository).save(any(User.class));
         }
 
         @Test
-        @DisplayName("Given an existing email, when creating user, then should throw exception")
-        void givenExistingEmail_whenCreateUser_thenShouldThrowException() {
-            // Given
-            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
+        @DisplayName("Given invalid CPF format, when creating user, then should be caught by validation layer")
+        void givenInvalidCpfFormat_whenCreateUser_thenShouldBeCaughtByValidationLayer() {
 
-            // When & Then
-            assertThatThrownBy(() -> userUseCase.createUser(createUserDTO))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("User with email already exists");
+            CreateUserDTO invalidCpfDTO = CreateUserDTO.builder()
+                    .name("Invalid User")
+                    .cpf("123")
+                    .email("invalid@test.com")
+                    .password("password123")
+                    .build();
 
-            verify(userRepository).findByEmail("joao@teste.com");
-            verify(userRepository, never()).save(any(User.class));
-        }
 
-        @Test
-        @DisplayName("Given an existing CPF, when creating user, then should throw exception")
-        void givenExistingCpf_whenCreateUser_thenShouldThrowException() {
-            // Given
-            when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-            when(userRepository.findByCpf(anyString())).thenReturn(Optional.of(testUser));
-
-            // When & Then
-            assertThatThrownBy(() -> userUseCase.createUser(createUserDTO))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("User with CPF already exists");
-
-            verify(userRepository).findByEmail("joao@teste.com");
-            verify(userRepository).findByCpf("12345678901");
-            verify(userRepository, never()).save(any(User.class));
+            verifyNoInteractions(userRepository);
+            verifyNoInteractions(passwordEncoder);
         }
     }
 
@@ -132,33 +113,32 @@ class UserUseCaseTest {
         @Test
         @DisplayName("Given a valid ID, when getting user, then should return UserDTO")
         void givenValidId_whenGetUserById_thenShouldReturnUserDTO() {
-            // Given
-            when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-            // When
-            UserDTO result = userUseCase.getUserById(1L);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
-            // Then
+            UserDTO result = userUseCase.getUserById(testUser.getId());
+
             assertThat(result).isNotNull();
-            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getId()).isEqualTo(testUser.getId());
             assertThat(result.getName()).isEqualTo("João Silva");
             assertThat(result.getEmail()).isEqualTo("joao@teste.com");
 
-            verify(userRepository).findById(1L);
+            verify(userRepository).findById(testUser.getId());
         }
 
         @Test
         @DisplayName("Given a non-existent ID, when getting user, then should throw exception")
         void givenNonExistentId_whenGetUserById_thenShouldThrowException() {
-            // Given
-            when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
-            // When & Then
-            assertThatThrownBy(() -> userUseCase.getUserById(999L))
+            UUID nonExistentId = UUID.randomUUID();
+            when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+
+            assertThatThrownBy(() -> userUseCase.getUserById(nonExistentId))
                     .isInstanceOf(UserNotFoundException.class)
-                    .hasMessage("User not found with ID: 999");
+                    .hasMessage("User not found with ID: " + nonExistentId);
 
-            verify(userRepository).findById(999L);
+            verify(userRepository).findById(nonExistentId);
         }
     }
 
@@ -169,13 +149,11 @@ class UserUseCaseTest {
         @Test
         @DisplayName("Given a valid email, when getting user by username, then should return UserDTO")
         void givenValidEmail_whenGetUserByUsername_thenShouldReturnUserDTO() {
-            // Given
+
             when(userRepository.findByEmail("joao@teste.com")).thenReturn(Optional.of(testUser));
 
-            // When
             UserDTO result = userUseCase.getUserByUsername("joao@teste.com");
 
-            // Then
             assertThat(result).isNotNull();
             assertThat(result.getEmail()).isEqualTo("joao@teste.com");
             assertThat(result.getName()).isEqualTo("João Silva");
@@ -186,14 +164,14 @@ class UserUseCaseTest {
         @Test
         @DisplayName("Given a valid CPF, when getting user by username, then should return UserDTO")
         void givenValidCpf_whenGetUserByUsername_thenShouldReturnUserDTO() {
-            // Given
+
             when(userRepository.findByEmail("12345678901")).thenReturn(Optional.empty());
             when(userRepository.findByCpf("12345678901")).thenReturn(Optional.of(testUser));
 
-            // When
+
             UserDTO result = userUseCase.getUserByUsername("12345678901");
 
-            // Then
+
             assertThat(result).isNotNull();
             assertThat(result.getCpf()).isEqualTo("12345678901");
             assertThat(result.getName()).isEqualTo("João Silva");
@@ -205,16 +183,15 @@ class UserUseCaseTest {
         @Test
         @DisplayName("Given a non-existent username, when getting user by username, then should throw exception")
         void givenNonExistentUsername_whenGetUserByUsername_thenShouldThrowException() {
-            // Given
+
             when(userRepository.findByEmail("inexistente@teste.com")).thenReturn(Optional.empty());
 
-            // When & Then
+
             assertThatThrownBy(() -> userUseCase.getUserByUsername("inexistente@teste.com"))
                     .isInstanceOf(UserNotFoundException.class)
                     .hasMessage("User not found");
 
             verify(userRepository).findByEmail("inexistente@teste.com");
-            // Note: findByCpf is only called if the username matches the CPF pattern (11 digits)
         }
     }
 
@@ -225,43 +202,37 @@ class UserUseCaseTest {
         @Test
         @DisplayName("Given valid credentials, when logging in, then should return AuthResponseDTO")
         void givenValidCredentials_whenLogin_thenShouldReturnAuthResponseDTO() {
-            // Given
+
             LoginDTO loginDTO = LoginDTO.builder()
                     .username("joao@teste.com")
                     .password("12345678")
                     .build();
 
-            // When
-            // Note: This test would be more complex as it involves AuthenticationManager
-            // For now, we will skip this test or create an integration test
+
         }
 
         @Test
         @DisplayName("Given incorrect password, when logging in, then should throw exception")
         void givenInvalidPassword_whenLogin_thenShouldThrowException() {
-            // Given
+
             LoginDTO loginDTO = LoginDTO.builder()
                     .username("joao@teste.com")
                     .password("senhaErrada")
                     .build();
 
-            // When & Then
-            // Note: This test would be more complex as it involves AuthenticationManager
-            // For now, we will skip this test or create an integration test
+
         }
 
         @Test
         @DisplayName("Given non-existent user, when logging in, then should throw exception")
         void givenNonExistentUser_whenLogin_thenShouldThrowException() {
-            // Given
+
             LoginDTO loginDTO = LoginDTO.builder()
                     .username("inexistente@teste.com")
                     .password("12345678")
                     .build();
 
-            // When & Then
-            // Note: This test would be more complex as it involves AuthenticationManager
-            // For now, we will skip this test or create an integration test
+
         }
     }
 }

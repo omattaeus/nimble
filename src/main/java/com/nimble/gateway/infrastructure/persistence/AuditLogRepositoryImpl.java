@@ -9,13 +9,14 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface AuditLogRepositoryImpl extends JpaRepository<AuditLog, Long>, AuditLogRepository {
+public interface AuditLogRepositoryImpl extends JpaRepository<AuditLog, UUID>, AuditLogRepository {
     
     @Override
-    @Query("SELECT a FROM AuditLog a WHERE a.userId = :userId ORDER BY a.createdAt DESC")
-    List<AuditLog> findByUserId(@Param("userId") Long userId);
+    @Query("SELECT a FROM AuditLog a WHERE a.user = :user ORDER BY a.createdAt DESC")
+    List<AuditLog> findByUser(@Param("user") com.nimble.gateway.domain.entity.User user);
     
     @Override
     @Query("SELECT a FROM AuditLog a WHERE a.action = :action ORDER BY a.createdAt DESC")
@@ -23,13 +24,9 @@ public interface AuditLogRepositoryImpl extends JpaRepository<AuditLog, Long>, A
     
     @Override
     @Query("SELECT a FROM AuditLog a WHERE a.entityType = :entityType AND a.entityId = :entityId ORDER BY a.createdAt DESC")
-    List<AuditLog> findByEntityTypeAndEntityId(@Param("entityType") String entityType, @Param("entityId") Long entityId);
+    List<AuditLog> findByEntityTypeAndEntityId(@Param("entityType") String entityType, @Param("entityId") String entityId);
     
     @Override
     @Query("SELECT a FROM AuditLog a WHERE a.createdAt BETWEEN :startDate AND :endDate ORDER BY a.createdAt DESC")
     List<AuditLog> findByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
-    
-    @Override
-    @Query("SELECT a FROM AuditLog a WHERE a.status = :status ORDER BY a.createdAt DESC")
-    List<AuditLog> findByStatus(@Param("status") String status);
 }

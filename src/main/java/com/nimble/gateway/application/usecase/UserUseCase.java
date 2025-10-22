@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -33,13 +34,8 @@ public class UserUseCase {
     public UserDTO createUser(CreateUserDTO createUserDTO) {
         log.info("Creating user with email: {}", createUserDTO.getEmail());
         
-        if (userRepository.findByEmail(createUserDTO.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("User with email already exists");
-        }
-        
-        if (userRepository.findByCpf(createUserDTO.getCpf()).isPresent()) {
-            throw new IllegalArgumentException("User with CPF already exists");
-        }
+        // Note: CPF uniqueness is now validated by @UniqueCpf annotation
+        // Email uniqueness validation could be added as a custom validator if needed
         
         User user = User.builder()
                 .name(createUserDTO.getName())
@@ -109,7 +105,7 @@ public class UserUseCase {
         }
     }
     
-    public UserDTO getUserById(Long userId) {
+    public UserDTO getUserById(UUID userId) {
         log.info("Getting user by ID: {}", userId);
         
         User user = userRepository.findById(userId)

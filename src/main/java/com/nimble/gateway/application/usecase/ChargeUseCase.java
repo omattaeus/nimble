@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,7 +25,7 @@ public class ChargeUseCase {
     private final UserRepository userRepository;
     
     @Transactional
-    public ChargeDTO createCharge(CreateChargeDTO createChargeDTO, Long originatorId) {
+    public ChargeDTO createCharge(CreateChargeDTO createChargeDTO, UUID originatorId) {
         log.info("Creating charge from user {} to CPF {}", originatorId, createChargeDTO.getRecipientCpf());
         
         User originator = userRepository.findById(originatorId)
@@ -61,7 +62,7 @@ public class ChargeUseCase {
                 .build();
     }
     
-    public List<ChargeDTO> getChargesByOriginator(Long originatorId, String status) {
+    public List<ChargeDTO> getChargesByOriginator(UUID originatorId, String status) {
         log.info("Getting charges by originator {} with status {}", originatorId, status);
         
         User originator = userRepository.findById(originatorId)
@@ -80,7 +81,7 @@ public class ChargeUseCase {
                 .collect(Collectors.toList());
     }
     
-    public List<ChargeDTO> getChargesByRecipient(Long recipientId, String status) {
+    public List<ChargeDTO> getChargesByRecipient(UUID recipientId, String status) {
         log.info("Getting charges by recipient {} with status {}", recipientId, status);
         
         User recipient = userRepository.findById(recipientId)
@@ -99,7 +100,7 @@ public class ChargeUseCase {
                 .collect(Collectors.toList());
     }
     
-    public ChargeDTO getChargeById(Long chargeId, Long userId) {
+    public ChargeDTO getChargeById(UUID chargeId, UUID userId) {
         log.info("Getting charge {} for user {}", chargeId, userId);
         
         Charge charge = chargeRepository.findById(chargeId)
