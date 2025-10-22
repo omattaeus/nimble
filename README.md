@@ -1,8 +1,5 @@
 # 🏦 Nimble Gateway
 
-> **Desafio Técnico - Desenvolvedor Backend Pleno**  
-> *Gateway de Pagamentos Simplificado*
-
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-3.9.11-blue.svg)](https://maven.apache.org/)
