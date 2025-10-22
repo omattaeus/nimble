@@ -1,8 +1,5 @@
 # 🏦 Nimble Gateway
 
-> **Desafio Técnico - Desenvolvedor Backend Pleno**  
-> *Gateway de Pagamentos Simplificado*
-
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-3.9.11-blue.svg)](https://maven.apache.org/)
@@ -10,7 +7,7 @@
 [![Tests](https://img.shields.io/badge/Tests-51%20passing-brightgreen.svg)](#-testes)
 [![Coverage](https://img.shields.io/badge/Coverage-11%25-red.svg)](#-cobertura-de-código)
 
-## 📋 Índice
+## Índice
 
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Funcionalidades](#-funcionalidades)
@@ -26,7 +23,7 @@
 - [Contribuição](#-contribuição)
 - [Licença](#-licença)
 
-## 🎯 Sobre o Projeto
+## Sobre o Projeto
 
 O **Nimble Gateway** é um gateway de pagamentos simplificado desenvolvido como parte do desafio técnico para a posição de **Desenvolvedor Backend Pleno** na **Nimble Soluções em Banking e Meios de Pagamento**.
 
@@ -44,17 +41,17 @@ Desenvolver uma aplicação que funcione como um gateway de pagamentos simplific
 
 Este projeto demonstra habilidades em:
 
-- 🏗️ **Design de Software** - Estruturação e organização do código
-- 🌐 **APIs RESTful** - Endpoints seguindo padrões REST
-- 🗄️ **Banco de Dados Relacional** - Modelagem e interação eficiente
-- 🔗 **Integração Externa** - Chamadas a serviços externos
-- 🔒 **Segurança** - Autenticação JWT e hash de senhas
-- 🧪 **Testes** - Cobertura de código e qualidade
-- 🐳 **Containerização** - Docker para facilitar deploy
+- **Design de Software** - Estruturação e organização do código
+- **APIs RESTful** - Endpoints seguindo padrões REST
+- **Banco de Dados Relacional** - Modelagem e interação eficiente
+- **Integração Externa** - Chamadas a serviços externos
+- **Segurança** - Autenticação JWT e hash de senhas
+- **Testes** - Cobertura de código e qualidade
+- **Containerização** - Docker para facilitar deploy
 
-## 🚀 Funcionalidades
+## Funcionalidades
 
-### 1. 👤 Gerenciamento de Usuários
+### 1. Gerenciamento de Usuários
 
 - **Cadastro de Usuário**
   - Campos obrigatórios: Nome, CPF, e-mail e senha
@@ -68,7 +65,7 @@ Este projeto demonstra habilidades em:
   - Proteção de endpoints sensíveis
   - Rate limiting para segurança
 
-### 2. 💰 Gestão de Cobranças
+### 2. Gestão de Cobranças
 
 - **Criação de Cobranças**
   - Originador cria cobrança para destinatário
@@ -82,7 +79,7 @@ Este projeto demonstra habilidades em:
   - Filtros por status: Pendente, Paga, Cancelada
   - Paginação e ordenação
 
-### 3. 💳 Pagamentos
+### 3. Pagamentos
 
 - **Pagamento por Saldo**
   - Verificação de saldo suficiente
@@ -99,7 +96,7 @@ Este projeto demonstra habilidades em:
   - Adição segura ao saldo do usuário
   - Auditoria de transações
 
-### 4. ❌ Cancelamento
+### 4. Cancelamento
 
 - **Cobranças Pendentes**
   - Mudança de status para cancelada
@@ -110,7 +107,7 @@ Este projeto demonstra habilidades em:
   - Autorização externa para cartão de crédito
   - Reversão de transações
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 ### Backend
 - **Java 25** - Linguagem principal
@@ -121,8 +118,7 @@ Este projeto demonstra habilidades em:
 - **Maven** - Gerenciamento de dependências
 
 ### Banco de Dados
-- **H2** - Banco em memória para testes
-- **PostgreSQL** - Banco de produção
+- **MySQL** - Banco de dados principal
 - **Flyway** - Migração de banco
 
 ### Testes
@@ -141,7 +137,7 @@ Este projeto demonstra habilidades em:
 - **MapStruct** - Mapeamento de DTOs
 - **Resilience4j** - Circuit breaker
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 ### Padrão Arquitetural
 O projeto segue os princípios da **Clean Architecture** com separação clara de responsabilidades:
@@ -177,7 +173,7 @@ Controller → UseCase → Repository → Database
    DTO ←→ Entity
 ```
 
-## 📦 Instalação
+## Instalação
 
 ### Pré-requisitos
 - **Java 25+**
@@ -223,7 +219,7 @@ docker build -t nimble-gateway .
 docker run -p 8080:8080 nimble-gateway
 ```
 
-## ⚙️ Configuração
+## Configuração
 
 ### Arquivo de Configuração
 ```yaml
@@ -234,9 +230,9 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/nimble_gateway
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: jdbc:mysql://localhost:3306/nimble_gateway
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -256,9 +252,9 @@ external:
 ### Variáveis de Ambiente
 ```bash
 # Banco de dados
-export DB_USERNAME=postgres
-export DB_PASSWORD=postgres
-export DB_URL=jdbc:postgresql://localhost:5432/nimble_gateway
+export DB_USERNAME=root
+export DB_PASSWORD=password
+export DB_URL=jdbc:mysql://localhost:3306/nimble_gateway
 
 # JWT
 export JWT_SECRET=your-super-secret-key
@@ -267,7 +263,7 @@ export JWT_SECRET=your-super-secret-key
 export SPRING_PROFILES_ACTIVE=prod
 ```
 
-## 🚀 Uso
+## Uso
 
 ### 1. Iniciar a Aplicação
 ```bash
@@ -302,16 +298,16 @@ curl -X POST http://localhost:8080/api/auth/login \
   }'
 ```
 
-## 📚 API Endpoints
+## API Endpoints
 
-### 🔐 Autenticação
+### Autenticação
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | `POST` | `/api/auth/register` | Cadastro de usuário |
 | `POST` | `/api/auth/login` | Login de usuário |
 | `GET` | `/api/auth/me` | Dados do usuário atual |
 
-### 💰 Cobranças
+### Cobranças
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | `POST` | `/api/charges` | Criar cobrança |
@@ -319,20 +315,20 @@ curl -X POST http://localhost:8080/api/auth/login \
 | `GET` | `/api/charges/received` | Cobranças recebidas |
 | `GET` | `/api/charges/{id}` | Cobrança específica |
 
-### 💳 Pagamentos
+### Pagamentos
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | `POST` | `/api/payments/pay` | Pagar cobrança |
 | `POST` | `/api/payments/deposit` | Fazer depósito |
 | `POST` | `/api/payments/cancel/{id}` | Cancelar cobrança |
 
-### 📊 Monitoramento
+### Monitoramento
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | `GET` | `/actuator/health` | Status da aplicação |
 | `GET` | `/actuator/metrics` | Métricas da aplicação |
 
-## 🧪 Testes
+## Testes
 
 ### Executar Testes
 ```bash
@@ -362,7 +358,7 @@ src/test/java/
 - **Testes Unitários**: 42
 - **Testes de Integração**: 9
 
-## 📊 Cobertura de Código
+## Cobertura de Código
 
 ### Relatório JaCoCo
 ```bash
@@ -385,7 +381,7 @@ open target/site/jacoco/index.html
 - `domain.entity`: **36%**
 - `infrastructure.security`: **26%**
 
-## 🐳 Docker
+## Docker
 
 ### Dockerfile
 ```dockerfile
@@ -411,21 +407,22 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - postgres
+      - mysql
 
-  postgres:
-    image: postgres:15
+  mysql:
+    image: mysql:8.0
     environment:
-      POSTGRES_DB: nimble_gateway
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_DATABASE: nimble_gateway
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  postgres_data:
+  mysql_data:
 ```
 
 ### Comandos Docker
@@ -440,7 +437,7 @@ docker-compose up -d
 docker-compose down
 ```
 
-## 🔧 Desenvolvimento
+## Desenvolvimento
 
 ### Estrutura do Projeto
 ```
@@ -462,54 +459,3 @@ nimble-gateway/
 - **SOLID** - Princípios de design
 - **DRY** - Don't Repeat Yourself
 - **KISS** - Keep It Simple, Stupid
-
-### Commits
-```bash
-# Padrão de commits
-feat: adicionar nova funcionalidade
-fix: corrigir bug
-docs: atualizar documentação
-test: adicionar testes
-refactor: refatorar código
-```
-
-## 🤝 Contribuição
-
-### Como Contribuir
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-### Padrões de Desenvolvimento
-- Seguir as convenções de código Java
-- Escrever testes para novas funcionalidades
-- Manter a cobertura de código
-- Documentar mudanças significativas
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## 👨‍💻 Autor
-
-**Desenvolvedor Backend Pleno**  
-*Desafio Técnico - Nimble Soluções*
-
-- **Contato**: +55 15 99652-0886
-- **Empresa**: Nimble Soluções em Banking e Meios de Pagamento LTDA
-- **CNPJ**: 48.132.833/0001-32
-- **Endereço**: Alameda Rio Negro, nº 503, sala 2020, Alphaville Centro Empresarial, Barueri/SP, CEP 06454-000
-
----
-
-<div align="center">
-
-**Desenvolvido com ❤️ para o Desafio Técnico da Nimble**
-
-[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.java.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.10-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Maven](https://img.shields.io/badge/Maven-3.9.11-blue.svg)](https://maven.apache.org/)
-
-</div>
