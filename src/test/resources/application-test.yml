@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+  flyway:
+    enabled: false
+
+# JWT Configuration
+app:
+  jwt:
+    secret: testSecretKey123456789012345678901234567890123456789012345678901234567890
+    expiration: 86400000 # 24 hours
+    refresh-expiration: 604800000 # 7 days
+
+# External Services
+external:
+  authorizer:
+    url: https://httpbin.org/status/200
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging Configuration
+logging:
+  level:
+    com.nimble.gateway: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN

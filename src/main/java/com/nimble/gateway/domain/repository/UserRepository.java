@@ -13,4 +13,5 @@ public interface UserRepository {
     boolean existsByCpf(String cpf);
     boolean existsByEmail(String email);
     void deleteById(Long id);
+    void deleteAll();
 }

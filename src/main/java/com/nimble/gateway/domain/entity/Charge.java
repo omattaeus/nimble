@@ -58,6 +58,11 @@ public class Charge {
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
+    @Builder.Default
+    private PaymentMethod paymentMethod = PaymentMethod.BALANCE;
+    
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
@@ -89,5 +94,9 @@ public class Charge {
     
     public enum ChargeStatus {
         PENDING, PAID, CANCELLED
+    }
+    
+    public enum PaymentMethod {
+        BALANCE, CREDIT_CARD
     }
 }

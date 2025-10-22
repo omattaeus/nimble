@@ -41,9 +41,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
     
-    @Column(name = "account_balance", nullable = false, precision = 10, scale = 2)
+    @Column(name = "balance", nullable = false, precision = 10, scale = 2)
     @Builder.Default
-    private BigDecimal accountBalance = BigDecimal.ZERO;
+    private BigDecimal balance = BigDecimal.ZERO;
     
     @Column(name = "is_active", nullable = false)
     @Builder.Default
@@ -93,16 +93,16 @@ public class User implements UserDetails {
     
     public void credit(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Credit amount must be positive");
-        this.accountBalance = this.accountBalance.add(amount);
+        this.balance = this.balance.add(amount);
     }
     
     public void debit(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Debit amount must be positive");
-        if (this.accountBalance.compareTo(amount) < 0) throw new IllegalStateException("Insufficient balance");
-        this.accountBalance = this.accountBalance.subtract(amount);
+        if (this.balance.compareTo(amount) < 0) throw new IllegalStateException("Insufficient balance");
+        this.balance = this.balance.subtract(amount);
     }
     
     public boolean hasSufficientBalance(BigDecimal amount) {
-        return this.accountBalance.compareTo(amount) >= 0;
+        return this.balance.compareTo(amount) >= 0;
     }
 }

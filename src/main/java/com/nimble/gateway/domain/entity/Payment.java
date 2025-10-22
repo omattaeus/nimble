@@ -65,6 +65,10 @@ public class Payment {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "payment_date", nullable = false)
+    @Builder.Default
+    private LocalDateTime paymentDate = LocalDateTime.now();
+    
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     

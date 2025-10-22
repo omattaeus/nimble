@@ -11,15 +11,13 @@ import java.time.Duration;
 public class AuthorizerClient {
     
     private final WebClient webClient;
-    private final String authorizerUrl;
     
     public AuthorizerClient(
             WebClient.Builder webClientBuilder,
-            @Value("${app.external.authorizer.url:https://zsy6tx7aql.execute-api.saeast-1.amazonaws.com/authorizer}") String authorizerUrl) {
+            @Value("${external.authorizer.url:https://zsy6tx7aql.execute-api.saeast-1.amazonaws.com}") String authorizerUrl) {
         this.webClient = webClientBuilder
                 .baseUrl(authorizerUrl)
                 .build();
-        this.authorizerUrl = authorizerUrl;
     }
     
     public Mono<AuthorizerResponse> authorizePayment() {

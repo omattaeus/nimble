@@ -6,13 +6,6 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-/**
- * Money value object for financial calculations.
- * Immutable value object following DDD principles.
- * 
- * @author Anderson Cruz
- * @version 1.0
- */
 @Getter
 @EqualsAndHashCode
 public final class Money {
@@ -24,12 +17,8 @@ public final class Money {
     private final BigDecimal amount;
     
     public Money(BigDecimal amount) {
-        if (amount == null) {
-            throw new IllegalArgumentException("Amount cannot be null");
-        }
-        if (amount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Amount cannot be negative");
-        }
+        if (amount == null) throw new IllegalArgumentException("Amount cannot be null");
+        if (amount.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Amount cannot be negative");
         this.amount = amount.setScale(SCALE, ROUNDING_MODE);
     }
     
@@ -54,9 +43,7 @@ public final class Money {
     }
     
     public Money multiply(BigDecimal factor) {
-        if (factor.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Factor cannot be negative");
-        }
+        if (factor.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Factor cannot be negative");
         return new Money(this.amount.multiply(factor));
     }
     

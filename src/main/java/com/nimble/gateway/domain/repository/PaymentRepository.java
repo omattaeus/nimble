@@ -1,5 +1,6 @@
 package com.nimble.gateway.domain.repository;
 
+import com.nimble.gateway.domain.entity.Charge;
 import com.nimble.gateway.domain.entity.Payment;
 import com.nimble.gateway.domain.entity.User;
 
@@ -13,5 +14,6 @@ public interface PaymentRepository {
     List<Payment> findByPayer(User payer);
     List<Payment> findByPayerAndStatus(User payer, Payment.PaymentStatus status);
     Optional<Payment> findByExternalTransactionId(String externalTransactionId);
+    Optional<Payment> findByCharge(Charge charge);
     void deleteById(Long id);
 }
